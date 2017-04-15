@@ -1,3 +1,4 @@
+name: messager
 script: npm
 args: start
 env:
