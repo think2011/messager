@@ -1,5 +1,5 @@
 process.env.TZ = 'Asia/Shanghai'
-const modules  = require('./modules')
+const modules = require('./modules')
 
 ;(async function loop() {
     let vultrResult = await modules.vultr()
