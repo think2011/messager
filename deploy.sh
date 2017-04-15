@@ -1,6 +1,7 @@
 HOST=root@ss.think2011.net
+APP=messager
 SCRIPTS="
-    cd apps/messager;
+    cd apps/${APP};
 
     echo '*** 获取代码 ***';
     git pull;
@@ -11,7 +12,7 @@ SCRIPTS="
     echo;
 
     echo '*** 重启服务 ***';
-    pm2 reload messager;
+    pm2 reload ${APP};
     echo;
 "
 
