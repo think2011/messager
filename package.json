@@ -1,0 +1,12 @@
+{
+  "name": "messager",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:think2011/messager.git",
+  "author": "think2011 <452125301.hzplay@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^2.9.0",
+    "nodemailer": "^4.0.1"
+  }
+}
