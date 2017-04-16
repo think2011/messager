@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 HOST=root@ss.think2011.net
 APP=messager
 SCRIPTS="
