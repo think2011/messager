@@ -7,7 +7,7 @@ let options = {
     gzip   : true,
     url    : 'https://my.vultr.com/deploy/',
     headers: Object.assign(conf.headers, {
-        cookie: '__cfduid=dda8d80d491de9dc011b746c18231d1c51492236644; last_login_username=452125301.hzplay%40gmail.com; PHPSESSID=8doik3mopca2peo6as54569n83; PHPSESSID_login_expire=1492268646',
+        cookie: '__cfduid=dda8d80d491de9dc011b746c18231d1c51492236644; _gat=1; _ga=GA1.2.96966057.1492322922; last_login_username=452125301.hzplay%40gmail.com; discuss_token=bH%298%29oh5%24fTpL%24cKt%2AmneXWaoH8QYoHv; PHPSESSID=4vst5op4gev82d0tm25abmlmk7; PHPSESSID_login_expire=1492330132',
     })
 }
 
@@ -25,7 +25,7 @@ module.exports = async () => {
 
     switch (true) {
         // 上架了
-        case $('#VPSPLANID200.deployplansoldout').length:
+        case !!$('#VPSPLANID200.deployplansoldout').length:
             sender.send({
                 title: '便宜的 vultr vps 上架了',
                 body : `赶紧登录 https://my.vultr.com/deploy/ 购买！`
@@ -37,7 +37,8 @@ module.exports = async () => {
             break;
 
         // 登出了
-        case $('[name="password"]').length:
+        case !!$('[name="password"]').length:
+            console.log(11)
             sender.send({
                 title: 'messager:vultr授权过期了',
                 body : `授权过期了，赶紧去更新授权`
@@ -57,4 +58,3 @@ module.exports = async () => {
 
     return status
 }
-
