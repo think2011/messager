@@ -21,9 +21,10 @@ module.exports = async () => {
      * 2 登出了
      */
     let status = null
+    let $      = null
 
     try {
-        let $ = cheerio.load(await rp(options))
+        $ = cheerio.load(await rp(options))
     } catch (err) {
         console.error(err)
     }
