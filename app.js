@@ -1,6 +1,5 @@
 process.env.TZ = 'Asia/Shanghai'
 
-const modules = require('./modules')
 const path    = require('path')
 const Koa     = require('koa')
 const logger  = require('koa-logger')

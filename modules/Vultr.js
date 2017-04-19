@@ -2,32 +2,40 @@ const conf    = require('../conf')
 const sender  = require('./sender')
 const rp      = require('request-promise')
 const cheerio = require('cheerio')
+const _       = require('lodash')
 
 let options = {
-    gzip      : true,
     url       : 'https://my.vultr.com/deploy/',
     loginUrl  : 'https://my.vultr.com/',
     captchaUrl: 'https://my.vultr.com/_images/captcha.php?s=' + Date.now(),
     headers   : Object.assign(conf.headers, {
-        cookie: '__cfduid=dda8d80d491de9dc011b746c18231d1c51492236644; _gat=1; _ga=GA1.2.96966057.1492322922; last_login_username=452125301.hzplay%40gmail.com; discuss_token=bH%298%29oh5%24fTpL%24cKt%2AmneXWaoH8QYoHv; PHPSESSID=4vst5op4gev82d0tm25abmlmk7; PHPSESSID_login_expire=1492330132',
+        cookie: 'PHPSESSID=o5d0j04avr87i5jjc7amdso7p6',
     })
 }
 
+rp.debug = true
 
-// 轮训请求
+
 module.exports = class {
     constructor() {
 
     }
 
+    async getLoginToken() {
+    }
+
     // 登录
-    static async login(data) {
+    async login(data) {
         console.log('vultr:开始登录')
         let res = await rp({
-            url    : options.loginUrl,
-            method : 'POST',
-            headers: options.headers,
-            form   : data
+            simple                 : false,
+            followAllRedirects     : true,
+            resolveWithFullResponse: true,
+            gzip                   : true,
+            url                    : options.loginUrl,
+            method                 : 'POST',
+            headers                : options.headers,
+            form                   : data,
         })
 
         console.log(res.body)
@@ -37,7 +45,7 @@ module.exports = class {
     }
 
     // 获取验证码
-    static async getCaptcha() {
+    async getCaptcha() {
         console.log('vultr:获取验证码')
         let res = await rp({
             url     : options.captchaUrl,
@@ -48,6 +56,14 @@ module.exports = class {
         console.log('vultr:验证码完毕')
         return `data:image/png;base64,${res.toString('base64')}`
     }
+
+    isLogin(body) {
+        let $ = _.isString(body) ? cheerio.load(body) : body
+
+        return !!$('[name="password"]').length
+    }
+
+
 
     async run() {
         console.log('vultr:start')
@@ -62,7 +78,11 @@ module.exports = class {
         let $      = null
 
         try {
-            $ = cheerio.load(await rp(options))
+            $ = cheerio.load(await rp({
+                gzip   : true,
+                url    : options.url,
+                headers: options.headers
+            }))
         } catch (err) {
             console.error(err)
         }
@@ -81,8 +101,7 @@ module.exports = class {
                 break;
 
             // 登出了
-            case !!$('[name="password"]').length:
-                console.log(11)
+            case this.isLogin($):
                 sender.send({
                     title: 'messager:vultr授权过期了',
                     body : `授权过期了，赶紧去更新授权`

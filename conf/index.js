@@ -17,11 +17,7 @@ let conf = {
         to     : '452125301@qq.com'
     },
     headers: {
-        'Connection'     : 'keep-alive',
-        'User-Agent'     : 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1',
-        'DNT'            : '1',
-        'Accept-Encoding': 'gzip, deflate, sdch, br',
-        'Accept-Language': 'zh-CN,zh;q=0.8,zh-TW;q=0.6,en;q=0.4,sr;q=0.2'
+        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1',
     }
 }
 
