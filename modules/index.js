@@ -1,2 +1,2 @@
 exports.sender = require('./sender')
-exports.vultr  = require('./vultr')
+exports.Vultr  = require('./Vultr')
