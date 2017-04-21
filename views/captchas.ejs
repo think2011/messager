@@ -5,10 +5,15 @@
     <title>验证码登录</title>
 </head>
 <body>
-<img src="<%- image %>" alt="">
+<% if (locals.err) { %>
+<h2><%= err %></h2>
+<hr>
+<% } %>
 
+<img src="<%- captcha %>" alt="">
 <form action="captchas" method="post">
-    <input type="text" name="captcha" value="1211111">
+    <input type="text" name="captcha" value="" placeholder="输入验证码">
+    <input type="hidden" name="action" value="<%- action %>">
     <button type="submit">submit</button>
 </form>
 </body>

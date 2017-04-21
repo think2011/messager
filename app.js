@@ -27,9 +27,8 @@ app.listen(3000, () => {
 })
 
 ;(async function loop() {
-    /*   let vultrResult = await modules.vultr()
+    await vultr.check()
 
-     if (vultrResult === 0) {
-     setTimeout(loop, 1000 * 60 * 60 * 3)
-     }*/
+    console.log('*** 2个小时循环一次 ***')
+    setTimeout(loop, 1000 * 60 * 60 * 3)
 })()

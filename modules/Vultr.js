@@ -12,9 +12,6 @@ let options = {
     })
 }
 
-rp.debug = true
-
-
 module.exports = class {
     constructor() {
 
@@ -27,7 +24,10 @@ module.exports = class {
             headers: options.headers
         })
 
-        let tokens   = {}
+        let tokens   = {
+            captcha: null,
+            action : null,
+        }
         let $        = cheerio.load(res)
         let $captcha = $('.captcha_container img')
 
@@ -49,50 +49,36 @@ module.exports = class {
     }
 
     // 登录
-    login(data) {
-        return new Promise(async (resolve, reject) => {
-            console.log('vultr:开始登录')
-            let res = await rp({
-                method                 : 'POST',
-                simple                 : false,
-                followAllRedirects     : true,
-                resolveWithFullResponse: true,
-                gzip                   : true,
-                url                    : options.loginUrl,
-                headers                : options.headers,
-                form                   : data,
-            })
-
-            if (this.isLogin(res.body)) return reject('登录失败')
-
-            resolve('登录成功')
-            console.log('vultr:登录成功')
+    async login(data) {
+        console.log('vultr:开始登录')
+        let res = await rp({
+            method                 : 'POST',
+            simple                 : false,
+            followAllRedirects     : true,
+            resolveWithFullResponse: true,
+            gzip                   : true,
+            url                    : options.loginUrl,
+            headers                : options.headers,
+            form                   : data,
         })
+
+        if (this.isLogin(cheerio.load(res.body))) return Promise.reject('登录失败')
+
+        console.log('vultr:登录成功')
     }
 
-    // 获取验证码
-    async getCaptcha() {
-    }
-
-    isLogin(body) {
-        let $ = _.isString(body) ? cheerio.load(body) : body
-
+    isLogin($) {
         return !!$('[name="password"]').length
     }
 
+    /**
+     * 检查上架情况
+     * @returns {Promise.<void>}
+     */
+    async check() {
+        console.log('vultr:开始检查')
 
-    async run() {
-        console.log('vultr:start')
-
-        /**
-         * status
-         * 0 没结果
-         * 1 上架了
-         * 2 登出了
-         */
-        let status = null
-        let $      = null
-
+        let $ = null
         try {
             $ = cheerio.load(await rp({
                 gzip   : true,
@@ -103,37 +89,34 @@ module.exports = class {
             console.error(err)
         }
 
-        switch (true) {
-            // 上架了
-            case !!$('#VPSPLANID200.deployplansoldout').length:
-                sender.send({
-                    title: '便宜的 vultr vps 上架了',
-                    body : `赶紧登录 https://my.vultr.com/deploy/ 购买！`
-                }, (err, res) => {
-                    console.log(err, res)
-                })
-                console.log('*** 上架啦！！ ***')
-                status = 1
-                break;
-
-            // 登出了
-            case this.isLogin($):
-                this.startLogin()
-                status = 2
-                break;
-
-            // 没结果
-            default:
-                console.log('*** 没有结果 ***')
-                status = 0
+        if (this.isLogin($)) {
+            console.log('*** 未登录 ***')
+            try {
+                await this.startLogin()
+                this.check() // 登录了，再来一次
+            } catch (err) {
+                console.log(err)
+            }
+            return
         }
-        console.log('vultr:end')
 
-        return status
+        if (!!$('#VPSPLANID200.deployplansoldout').length) {
+            console.log('*** 上架啦！！ ***')
+            sender.send({
+                title: '便宜的 vultr vps 上架了',
+                body : `赶紧登录 https://my.vultr.com/deploy/ 购买！`
+            }, (err, res) => {
+                console.log(err, res)
+            })
+            return
+        }
+
+        console.log('*** 没有结果 ***')
+        console.log('vultr:检查结束')
     }
 
     async startLogin() {
-        let tokens = await this.getLoginTok                                                     en()
+        let tokens = await this.getLoginToken()
 
         if (tokens.captcha) {
             console.log('*** 验证码登录 ***')
@@ -143,10 +126,11 @@ module.exports = class {
             }, (err, res) => {
                 console.log(err, res)
             })
+            return Promise.reject()
         }
         else {
             console.log('*** 无需验证码 ***')
-            this.login({
+            return this.login({
                 action  : tokens.action,
                 password: conf.vultr.pass,
                 username: conf.vultr.user
