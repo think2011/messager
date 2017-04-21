@@ -1,38 +1,38 @@
 const router = require('koa-rest-router')()
 const Vultr  = require('./modules/Vultr')
+const conf   = require('./conf')
+
 
 const vultr = new Vultr()
 
 
 // TODO ZH 19/04/2017
-let data = {
-    action  : '4w/VHwb4u9YqWKf1Gbcjd89KosKVNk8fNo7UdbSIlX8=',
-    captcha : 'udadku',
-    password: 'z@vultr@z27Z',
-    username: '452125301.hzplay@gmail.com'
-}
 
-vultr.login(data)
+vultr.startLogin()
+// vultr.login(data)
 
 router.resource('captchas', {
     async index (ctx, next) {
-        let image = await Vultr.getCaptcha()
+        let tokens = await this.getLoginToken()
 
-        await ctx.render('captchas', {
-            image
-        })
+        await ctx.render('captchas', tokens)
     },
 
     async create(ctx, next) {
-        let {captcha} = ctx.request.fields
-        let data      = {
-            action  : '4w/VHwb4u9YqWKf1Gbcjd89KosKVNk8fNo7UdbSIlX8=',
-            captcha,
-            password: 'z@vultr@z27Z',
-            username: '452125301.hzplay@gmail.com'
+        let fields = ctx.request.fields
+
+        try {
+            await Vultr.login({
+                action  : fields.action,
+                captcha : fields.action,
+                password: conf.vultr.pass,
+                username: conf.vultr.user
+            })
+            ctx.body = '登录成功'
+        } catch (err) {
+            ctx.redirect(`/captchas?err=${encodeURI(err)}`)
         }
 
-        ctx.body = await Vultr.login(data)
         next()
     }
 })

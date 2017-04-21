@@ -5,10 +5,9 @@ const cheerio = require('cheerio')
 const _       = require('lodash')
 
 let options = {
-    url       : 'https://my.vultr.com/deploy/',
-    loginUrl  : 'https://my.vultr.com/',
-    captchaUrl: 'https://my.vultr.com/_images/captcha.php?s=' + Date.now(),
-    headers   : Object.assign(conf.headers, {
+    url     : 'https://my.vultr.com/deploy/',
+    loginUrl: 'https://my.vultr.com/',
+    headers : Object.assign(conf.headers, {
         cookie: 'PHPSESSID=o5d0j04avr87i5jjc7amdso7p6',
     })
 }
@@ -22,39 +21,57 @@ module.exports = class {
     }
 
     async getLoginToken() {
+        let res = await rp({
+            gzip   : true,
+            url    : options.loginUrl,
+            headers: options.headers
+        })
+
+        let tokens   = {}
+        let $        = cheerio.load(res)
+        let $captcha = $('.captcha_container img')
+
+        if ($captcha.length) {
+            console.log('vultr:获取验证码')
+            let captcha = await rp({
+                url     : `https://my.vultr.com/${$captcha.attr('src')}`,
+                headers : options.headers,
+                encoding: null
+            })
+
+            tokens.captcha = `data:image/png;base64,${captcha.toString('base64')}`
+            console.log('vultr:验证码完毕')
+        }
+
+        tokens.action = $('[name="action"]').val()
+
+        return tokens
     }
 
     // 登录
-    async login(data) {
-        console.log('vultr:开始登录')
-        let res = await rp({
-            simple                 : false,
-            followAllRedirects     : true,
-            resolveWithFullResponse: true,
-            gzip                   : true,
-            url                    : options.loginUrl,
-            method                 : 'POST',
-            headers                : options.headers,
-            form                   : data,
+    login(data) {
+        return new Promise(async (resolve, reject) => {
+            console.log('vultr:开始登录')
+            let res = await rp({
+                method                 : 'POST',
+                simple                 : false,
+                followAllRedirects     : true,
+                resolveWithFullResponse: true,
+                gzip                   : true,
+                url                    : options.loginUrl,
+                headers                : options.headers,
+                form                   : data,
+            })
+
+            if (this.isLogin(res.body)) return reject('登录失败')
+
+            resolve('登录成功')
+            console.log('vultr:登录成功')
         })
-
-        console.log(res.body)
-
-        console.log('vultr:登录成功')
-        return res.body
     }
 
     // 获取验证码
     async getCaptcha() {
-        console.log('vultr:获取验证码')
-        let res = await rp({
-            url     : options.captchaUrl,
-            headers : options.headers,
-            encoding: null
-        })
-
-        console.log('vultr:验证码完毕')
-        return `data:image/png;base64,${res.toString('base64')}`
     }
 
     isLogin(body) {
@@ -62,7 +79,6 @@ module.exports = class {
 
         return !!$('[name="password"]').length
     }
-
 
 
     async run() {
@@ -102,13 +118,7 @@ module.exports = class {
 
             // 登出了
             case this.isLogin($):
-                sender.send({
-                    title: 'messager:vultr授权过期了',
-                    body : `授权过期了，赶紧去更新授权`
-                }, (err, res) => {
-                    console.log(err, res)
-                })
-                console.log('*** 授权过期 ***')
+                this.startLogin()
                 status = 2
                 break;
 
@@ -120,5 +130,27 @@ module.exports = class {
         console.log('vultr:end')
 
         return status
+    }
+
+    async startLogin() {
+        let tokens = await this.getLoginToken()
+
+        if (tokens.captcha) {
+            console.log('*** 验证码登录 ***')
+            sender.send({
+                title: 'messager:vultr授权过期了',
+                body : `<a href="http://ss.think2011.net:3000/captcha">>> 赶紧去更新</a>`
+            }, (err, res) => {
+                console.log(err, res)
+            })
+        }
+        else {
+            console.log('*** 无需验证码 ***')
+            this.login({
+                action  : tokens.action,
+                password: conf.vultr.pass,
+                username: conf.vultr.user
+            })
+        }
     }
 }
