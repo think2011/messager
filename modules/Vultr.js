@@ -133,7 +133,7 @@ module.exports = class {
     }
 
     async startLogin() {
-        let tokens = await this.getLoginToken()
+        let tokens = await this.getLoginTok                                                     en()
 
         if (tokens.captcha) {
             console.log('*** 验证码登录 ***')

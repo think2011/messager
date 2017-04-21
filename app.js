@@ -1,13 +1,15 @@
 process.env.TZ = 'Asia/Shanghai'
 
-const path    = require('path')
-const Koa     = require('koa')
-const logger  = require('koa-logger')
-const body    = require('koa-better-body')
-const render  = require('koa-ejs')
-const routes  = require('./routes')
+const path   = require('path')
+const Koa    = require('koa')
+const logger = require('koa-logger')
+const body   = require('koa-better-body')
+const render = require('koa-ejs')
+const Vultr  = require('./modules/Vultr')
+const routes = require('./routes')
 
-const app = new Koa()
+const vultr = new Vultr()
+const app   = new Koa()
 
 render(app, {
     root   : path.join(__dirname, 'views'),
