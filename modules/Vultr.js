@@ -71,6 +71,15 @@ module.exports = class {
         return !!$('[name="password"]').length
     }
 
+    isRelease(html) {
+        let reg = /availabilityMap ?= ?({[^]+?});/g.exec(html)
+        if (!reg) return false
+
+        let data = JSON.parse(reg[1])
+
+        return data['SSD'][1][200] !== 'soldout'
+    }
+
     /**
      * 检查上架情况
      * @returns {Promise.<void>}
@@ -100,10 +109,10 @@ module.exports = class {
             return
         }
 
-        if (!!$('#VPSPLANID200.deployplansoldout').length) {
+        if (this.isRelease($.html())) {
             console.log('*** 上架啦！！ ***')
             sender.send({
-                title: '便宜的 vultr vps 上架了',
+                title: '上架啦！! 上架啦！! vultr vps 上架了',
                 body : `赶紧登录 https://my.vultr.com/deploy/ 购买！`
             }, (err, res) => {
                 console.log(err, res)
