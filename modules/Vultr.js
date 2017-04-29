@@ -75,9 +75,21 @@ module.exports = class {
         let reg = /availabilityMap ?= ?({[^]+?});/g.exec(html)
         if (!reg) return false
 
-        let data = JSON.parse(reg[1])
+        let data   = JSON.parse(reg[1])
+        let result = {release: false, sl: []}
 
-        return data['SSD'][1][200] !== 'soldout'
+        for (let p in data['SSD']) {
+            if (!data['SSD'].hasOwnProperty(p)) continue;
+            let ssd = data['SSD']
+
+            if (ssd[p][200] && ssd[p][200] !== 'soldout') {
+                result.release = true
+                result.sl.push(p)
+            }
+        }
+        result.sl = result.sl.join('|')
+
+        return result
     }
 
     /**
@@ -109,11 +121,12 @@ module.exports = class {
             return
         }
 
-        if (this.isRelease($.html())) {
+        let isRelease = this.isRelease($.html())
+        if (isRelease.release) {
             console.log('*** 上架啦！！ ***')
             sender.send({
                 title: '上架啦！! 上架啦！! vultr vps 上架了',
-                body : `赶紧登录 https://my.vultr.com/deploy/ 购买！`
+                body : `赶紧登录 https://my.vultr.com/deploy/ 购买！${isRelease.sl}`
             }, (err, res) => {
                 console.log(err, res)
             })

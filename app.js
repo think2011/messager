@@ -29,6 +29,6 @@ app.listen(3000, () => {
 ;(async function loop() {
     await vultr.check()
 
-    console.log('*** 2个小时循环一次 ***')
-    setTimeout(loop, 1000 * 60 * 60 * 3)
+    console.log('*** 1个小时循环一次 ***')
+    setTimeout(loop, 1000 * 60 * 60)
 })()
