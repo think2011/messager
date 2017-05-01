@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js -p xxxx"
+    "start": "node app.js"
   },
   "repository": "git@github.com:think2011/messager.git",
   "author": "think2011 <452125301.hzplay@gmail.com>",
