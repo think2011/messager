@@ -10,7 +10,6 @@
   "license": "MIT",
   "dependencies": {
     "cheerio": "^0.22.0",
-    "commander": "^2.9.0",
     "koa": "^2.2.0",
     "koa-better-body": "^3.0.2",
     "koa-better-router": "^2.1.1",
