@@ -76,15 +76,19 @@ module.exports = class {
         if (!reg) return false
 
         let data   = JSON.parse(reg[1])
+        let SSD    = data['SSD']
         let result = {release: false, sl: []}
 
-        for (let p in data['SSD']) {
-            if (!data['SSD'].hasOwnProperty(p)) continue;
-            let ssd = data['SSD']
+        let DC     = {
+            5 : 'LA',
+            25: ' Tokyo',
+            40: ' Singapore',
+        }
 
-            if (ssd[p][200] && ssd[p][200] !== 'soldout') {
+        for (let p in DC) {
+            if (SSD[p][200] && SSD[p][200] !== 'soldout') {
                 result.release = true
-                result.sl.push(p)
+                result.sl.push(DC[p])
             }
         }
         result.sl = result.sl.join('|')
