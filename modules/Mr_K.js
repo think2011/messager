@@ -13,14 +13,17 @@ const moment  = require('moment')
 const _       = require('lodash')
 
 let url  = {
-    list: 'https://h5.qzone.qq.com/proxy/domain/b.qzone.qq.com/cgi-bin/blognew/get_abs?hostUin=2942298879&uin=452125301&blogType=0&reqInfo=1&num=50&g_tk=1037917341&format=json',
+    list: 'https://h5.qzone.qq.com/proxy/domain/b.qzone.qq.com/cgi-bin/blognew/get_abs?hostUin=2942298879&uin=452125301&blogType=0&reqInfo=1&num=50&g_tk=2026642081&format=json',
     detail(blogId){
         return `https://h5.qzone.qq.com/proxy/domain/b.qzone.qq.com/cgi-bin/blognew/blog_output_data?uin=2942298879&blogid=${blogId}`
     }
 }
 let rpap = rp.defaults({
     gzip   : true,
-    headers: Object.assign(conf.headers, {cookie: mrK.cookie})
+    headers: Object.assign(conf.headers, {
+        referer: 'https://qzs.qq.com/qzone/newblog/blogcanvas.html',
+        cookie: mrK.cookie
+    })
 })
 
 module.exports = class {
